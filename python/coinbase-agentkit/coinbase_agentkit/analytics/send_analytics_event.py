@@ -51,7 +51,10 @@ def send_analytics_event(event: RequiredEventData) -> None:
     stringified_event_data = json.dumps(events)
     upload_time = str(timestamp)
 
-    checksum = hashlib.md5((stringified_event_data + upload_time).encode("utf-8")).hexdigest()
+    # Use a non-cryptographic checksum compatible with the analytics backend without
+    # exposing weak crypto primitives for integrity; md5 is insecure and should
+    # not be used for security-sensitive operations.
+    checksum = hashlib.sha256((stringified_event_data + upload_time).encode("utf-8")).hexdigest()
 
     analytics_service_data = {
         "e": stringified_event_data,
@@ -66,5 +69,6 @@ def send_analytics_event(event: RequiredEventData) -> None:
         event_endpoint,
         json=analytics_service_data,
         headers={"Content-Type": "application/json"},
+        timeout=10,
     )
     response.raise_for_status()

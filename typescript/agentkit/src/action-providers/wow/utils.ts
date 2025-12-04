@@ -45,7 +45,8 @@ export async function getBuyQuote(
           address: tokenAddress as `0x${string}`,
           abi: WOW_ABI,
           functionName: "getEthBuyQuote",
-          args: [amountEthInWei],
+          // Ensure the argument is passed as a bigint to match on-chain units
+          args: [BigInt(amountEthInWei)],
         })
   ) as string | number;
 
@@ -74,7 +75,8 @@ export async function getSellQuote(
           address: tokenAddress as `0x${string}`,
           abi: WOW_ABI,
           functionName: "getTokenSellQuote",
-          args: [amountTokensInWei],
+          // Ensure the argument is passed as a bigint to match on-chain units
+          args: [BigInt(amountTokensInWei)],
         })
   ) as string | number;
 

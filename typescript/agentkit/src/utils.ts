@@ -60,5 +60,12 @@ export async function approve(
  * @returns The adjusted gas estimate as a bigint.
  */
 export function applyGasMultiplier(gas: bigint, multiplier: number): bigint {
-  return BigInt(Math.round(Number(gas) * multiplier));
+  if (!Number.isFinite(multiplier) || multiplier <= 0) return gas;
+  if (multiplier === 1) return gas;
+
+  // Perform bigint-safe scaling with fixed precision to avoid Number(gas) loss
+  const SCALE = 1000n; // three decimal places of precision
+  const scaledMultiplier = BigInt(Math.round(multiplier * Number(SCALE)));
+  // Round half-up by adding half the divisor before integer division
+  return (gas * scaledMultiplier + SCALE / 2n) / SCALE;
 }

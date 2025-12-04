@@ -267,7 +267,9 @@ export async function handleNextSelection(
       .filter(Boolean)
       .join("\n"),
   ];
-  await fs.writeFile(envPath, envLines);
+  // Persist the environment file as a single string. Passing an array would
+  // coerce to a comma-joined string implicitly, corrupting the .env format.
+  await fs.writeFile(envPath, envLines.join("\n"));
 
   // Promose selected routes to
   const promoteRoute = async (toPromose: string, type: string, to: string) => {
