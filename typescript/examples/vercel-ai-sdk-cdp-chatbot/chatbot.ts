@@ -8,7 +8,7 @@ import {
 } from "@coinbase/agentkit";
 import { getVercelAITools } from "@coinbase/agentkit-vercel-ai-sdk";
 import { openai } from "@ai-sdk/openai";
-import { generateId, Message, streamText, ToolSet } from "ai";
+import { generateId, UIMessage, streamText, ToolSet, convertToModelMessages } from "ai";
 import * as dotenv from "dotenv";
 import * as readline from "readline";
 import * as fs from "fs";
@@ -128,7 +128,7 @@ async function runChatMode(tools: ToolSet) {
   const question = (prompt: string): Promise<string> =>
     new Promise(resolve => rl.question(prompt, resolve));
 
-  const messages: Message[] = [];
+  const messages: UIMessage[] = [];
   let running = true;
 
   try {
@@ -140,7 +140,11 @@ async function runChatMode(tools: ToolSet) {
         continue;
       }
 
-      messages.push({ id: generateId(), role: "user", content: userInput });
+      messages.push({
+        id: generateId(),
+        role: "user",
+        parts: [{ type: "text", text: userInput }],
+      });
 
       const stream = streamText({
         model: openai("gpt-4o-mini"),
@@ -157,7 +161,11 @@ async function runChatMode(tools: ToolSet) {
       }
       console.log("\n-------------------");
 
-      messages.push({ id: generateId(), role: "assistant", content: assistantMessage });
+      messages.push({
+        id: generateId(),
+        role: "assistant",
+        parts: [{ type: "text", text: assistantMessage }],
+      });
     }
   } catch (error) {
     console.error("Error:", error);
@@ -175,7 +183,7 @@ async function runChatMode(tools: ToolSet) {
 async function runAutonomousMode(tools: ToolSet, interval = 10) {
   console.log("Starting autonomous mode...");
 
-  const messages: Message[] = [];
+  const messages: UIMessage[] = [];
 
   // eslint-disable-next-line no-constant-condition
   while (true) {
@@ -184,11 +192,15 @@ async function runAutonomousMode(tools: ToolSet, interval = 10) {
         "Be creative and do something interesting on the blockchain. " +
         "Choose an action or set of actions and execute it that highlights your abilities.";
 
-      messages.push({ id: generateId(), role: "user", content: thought });
+      messages.push({
+        id: generateId(),
+        role: "user",
+        parts: [{ type: "text", text: thought }],
+      });
 
       const stream = streamText({
         model: openai("gpt-4o-mini"),
-        messages,
+        messages: await convertToModelMessages(messages),
         tools,
         system,
         maxSteps: 10,
@@ -201,7 +213,11 @@ async function runAutonomousMode(tools: ToolSet, interval = 10) {
       }
       console.log("\n-------------------");
 
-      messages.push({ id: generateId(), role: "assistant", content: assistantMessage });
+      messages.push({
+        id: generateId(),
+        role: "assistant",
+        parts: [{ type: "text", text: assistantMessage }],
+      });
 
       await new Promise(resolve => setTimeout(resolve, interval * 1000));
     } catch (error) {
