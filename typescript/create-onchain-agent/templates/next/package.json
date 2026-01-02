@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^1.2.1",
+    "@ai-sdk/openai": "^3.0.2",
     "@coinbase/agentkit": "^0.4.0",
     "@coinbase/agentkit-langchain": "^0.3.0",
     "@coinbase/agentkit-vercel-ai-sdk": "^0.1.0",
