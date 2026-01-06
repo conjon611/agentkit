@@ -91,10 +91,11 @@ jobs:
         run: |
           cd typescript
           
-          # Check if NPM_TOKEN is set before attempting to publish
+          # Check if NODE_AUTH_TOKEN is set before attempting to publish
           if [ -z "$NODE_AUTH_TOKEN" ]; then
-            echo "Warning: NPM_TOKEN not set, skipping NPM publish"
+            echo "Warning: NODE_AUTH_TOKEN not set, skipping NPM publish"
             echo "Packages built but not published. Configure NPM_TOKEN secret in the 'npm' environment to enable publishing."
+            echo "Note: The NPM_TOKEN secret is mapped to NODE_AUTH_TOKEN environment variable by GitHub Actions."
             exit 0
           fi
           
