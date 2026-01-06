@@ -191,6 +191,7 @@ jobs:
               else
                 echo "Warning: PYPI_API_TOKEN not set, skipping publish for $pkg"
                 echo "Package built but not published. Configure PYPI_API_TOKEN secret in the 'pypi' environment to enable publishing."
+                echo "Note: The PYPI_API_TOKEN secret is mapped to PYPI_TOKEN environment variable in this workflow."
               fi
               cd - > /dev/null
             fi
