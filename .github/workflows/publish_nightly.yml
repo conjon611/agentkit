@@ -90,6 +90,15 @@ jobs:
       - name: Publish packages
         run: |
           cd typescript
+          
+          # Check if NODE_AUTH_TOKEN is set before attempting to publish
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "Warning: NODE_AUTH_TOKEN not set, skipping NPM publish"
+            echo "Packages built but not published. Configure NPM_TOKEN secret in the 'npm' environment to enable publishing."
+            echo "Note: The NPM_TOKEN secret is mapped to NODE_AUTH_TOKEN environment variable by GitHub Actions."
+            exit 0
+          fi
+          
           for pkg in ${{ steps.find-npm-packages.outputs.packages }}; do
             if [ -f "$pkg/package.json" ] && ! grep -q '"private": true' "$pkg/package.json"; then
               cd $pkg && npm publish --tag nightly --provenance --access public
@@ -105,6 +114,9 @@ jobs:
     environment:
       name: pypi
       url: https://pypi.org/p/coinbase-agentkit-langchain
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v4
         with:
@@ -172,10 +184,20 @@ jobs:
               cd $pkg
               poetry install --only main
               poetry build
-              poetry publish --username __token__ --password ${{ secrets.PYPI_API_TOKEN }}
+              
+              # Check if PYPI_API_TOKEN is set before attempting to publish
+              if [ -n "$PYPI_TOKEN" ]; then
+                poetry publish --username __token__ --password "$PYPI_TOKEN"
+              else
+                echo "Warning: PYPI_API_TOKEN not set, skipping publish for $pkg"
+                echo "Package built but not published. Configure PYPI_API_TOKEN secret in the 'pypi' environment to enable publishing."
+                echo "Note: The PYPI_API_TOKEN secret is mapped to PYPI_TOKEN environment variable in this workflow."
+              fi
               cd - > /dev/null
             fi
           done
+        env:
+          PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
 
   # create-github-release:
   #   needs: [prepare-nightly, publish-npm-nightly, publish-pypi-nightly]
