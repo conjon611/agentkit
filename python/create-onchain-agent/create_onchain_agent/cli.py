@@ -104,7 +104,7 @@ def get_template_path(template_name: str, templates_path: str | None = None) -> 
         return str(extract_path)
 
     # Download the zip file
-    response = requests.get(GITHUB_ZIP_URL)
+    response = requests.get(GITHUB_ZIP_URL, timeout=20)
     response.raise_for_status()
 
     with open(zip_path, "wb") as f:

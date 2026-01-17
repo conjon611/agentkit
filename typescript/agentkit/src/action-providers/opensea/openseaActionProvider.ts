@@ -51,7 +51,9 @@ export class OpenseaActionProvider extends ActionProvider<EvmWalletProvider> {
     this.apiKey = apiKey;
 
     const chainId = NETWORK_ID_TO_CHAIN_ID[config.networkId || "base-sepolia"];
-    const provider = ethers.getDefaultProvider(parseInt(chainId));
+    // Ensure a default provider is created with an explicit network definition.
+    // Passing an ID as a number without a network can resolve incorrectly in some ethers versions.
+    const provider = ethers.getDefaultProvider(Number.parseInt(chainId, 10));
     const walletWithProvider = new Wallet(config.privateKey!, provider);
     this.walletWithProvider = walletWithProvider;
 
