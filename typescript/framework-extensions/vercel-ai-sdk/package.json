@@ -48,6 +48,6 @@
   },
   "peerDependencies": {
     "@coinbase/agentkit": ">=0.1.0",
-    "ai": "^4.1.16"
+    "ai": "^6.0.5"
   }
 }
