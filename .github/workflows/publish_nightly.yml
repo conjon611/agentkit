@@ -37,7 +37,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
           cache-dependency-path: ./typescript
@@ -48,7 +48,7 @@ jobs:
       - name: Install dependencies and build packages
         run: |
           cd typescript
-          npm ci
+          npm install
           npm run build
 
       - name: Find NPM packages
@@ -219,7 +219,7 @@ jobs:
   #           }
 
   #           cd typescript
-  #           for pkg in $(find . -name "package.json" -not -path "*/node_modules/*" -not -path "./typescript/package.json" -not -path "*/examples/*" -not -path "*/create-onchain-agent/templates/*" -not -path "*/dist/*" -exec dirname {} \;); do
+  #           for pkg in $(find . -name "package.json" -not -path "*/node_modules/*" -not -path "./typescript/package.json" -not -path "*/examples/*" -not -path "*/create-onchain-agent/templates/[...]
   #             if [ -f "$pkg/package.json" ] && ! grep -q '"private": true' "$pkg/package.json"; then
   #               PKG_NAME=$(node -p "require('$pkg/package.json').name")
   #               CHANGELOG="$pkg/CHANGELOG.md"
