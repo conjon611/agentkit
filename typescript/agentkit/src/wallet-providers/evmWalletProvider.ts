@@ -1,9 +1,8 @@
-// TODO: Improve type safety
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { WalletProvider } from "./walletProvider";
 import {
   TransactionRequest,
+  TransactionReceipt,
+  TypedDataDefinition,
   ReadContractParameters,
   ReadContractReturnType,
   ContractFunctionName,
@@ -31,7 +30,7 @@ export abstract class EvmWalletProvider extends WalletProvider {
    * @param typedData - The typed data to sign.
    * @returns The signed typed data.
    */
-  abstract signTypedData(typedData: any): Promise<`0x${string}`>;
+  abstract signTypedData(typedData: TypedDataDefinition): Promise<`0x${string}`>;
 
   /**
    * Sign a transaction.
@@ -55,7 +54,7 @@ export abstract class EvmWalletProvider extends WalletProvider {
    * @param txHash - The transaction hash.
    * @returns The transaction receipt.
    */
-  abstract waitForTransactionReceipt(txHash: `0x${string}`): Promise<any>;
+  abstract waitForTransactionReceipt(txHash: `0x${string}`): Promise<TransactionReceipt>;
 
   /**
    * Read a contract.

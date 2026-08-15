@@ -5,8 +5,10 @@ import {
   ReadContractParameters,
   ReadContractReturnType,
   serializeTransaction,
+  TransactionReceipt,
   TransactionRequest,
   TransactionSerializable,
+  TypedDataDefinition,
   http,
   keccak256,
   Signature,
@@ -28,6 +30,7 @@ import {
   Trade,
   Wallet,
   WalletData,
+  TypedDataField,
   hashTypedDataMessage,
   hashMessage,
 } from "@coinbase/coinbase-sdk";
@@ -221,16 +224,20 @@ export class CdpWalletProvider extends EvmWalletProvider {
    * @param typedData - The typed data object to sign.
    * @returns The signed typed data object.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async signTypedData(typedData: any): Promise<`0x${string}`> {
+  async signTypedData(typedData: TypedDataDefinition): Promise<`0x${string}`> {
     if (!this.#cdpWallet) {
       throw new Error("Wallet not initialized");
     }
 
+    const { domain, types, message } = typedData;
+
+    // viem and the CDP SDK describe EIP-712 payloads with structurally equivalent but
+    // nominally different types: viem permits a bigint chain ID and exposes the field
+    // lists as readonly, while the CDP SDK expects a numeric chain ID and mutable arrays.
     const messageHash = hashTypedDataMessage(
-      typedData.domain!,
-      typedData.types!,
-      typedData.message!,
+      { ...domain, chainId: domain?.chainId === undefined ? undefined : Number(domain.chainId) },
+      types as unknown as Record<string, TypedDataField[]>,
+      message,
     );
 
     const payload = await this.#cdpWallet.createPayloadSignature(messageHash);
@@ -420,8 +427,7 @@ export class CdpWalletProvider extends EvmWalletProvider {
    * @param txHash - The hash of the transaction to wait for.
    * @returns The transaction receipt.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  async waitForTransactionReceipt(txHash: `0x${string}`): Promise<any> {
+  async waitForTransactionReceipt(txHash: `0x${string}`): Promise<TransactionReceipt> {
     return await this.#publicClient!.waitForTransactionReceipt({ hash: txHash });
   }
 

@@ -1,7 +1,7 @@
 import { erc20ActionProvider } from "./erc20ActionProvider";
 import { TransferSchema } from "./schemas";
 import { EvmWalletProvider } from "../../wallet-providers";
-import { encodeFunctionData, Hex } from "viem";
+import { encodeFunctionData, Hex, TransactionReceipt } from "viem";
 import { abi } from "./constants";
 
 const MOCK_AMOUNT = 15;
@@ -103,7 +103,7 @@ describe("Transfer Action", () => {
     } as unknown as jest.Mocked<EvmWalletProvider>;
 
     mockWallet.sendTransaction.mockResolvedValue(TRANSACTION_HASH);
-    mockWallet.waitForTransactionReceipt.mockResolvedValue({});
+    mockWallet.waitForTransactionReceipt.mockResolvedValue({} as TransactionReceipt);
   });
 
   it("should successfully respond", async () => {
