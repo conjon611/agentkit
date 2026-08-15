@@ -234,8 +234,20 @@ export class CdpWalletProvider extends EvmWalletProvider {
     // viem and the CDP SDK describe EIP-712 payloads with structurally equivalent but
     // nominally different types: viem permits a bigint chain ID and exposes the field
     // lists as readonly, while the CDP SDK expects a numeric chain ID and mutable arrays.
+    // Narrowing the chain ID is lossy beyond Number.MAX_SAFE_INTEGER, which would produce
+    // a silently incorrect hash, so reject those rather than sign the wrong payload.
+    let chainId: number | undefined;
+    if (domain?.chainId !== undefined) {
+      chainId = Number(domain.chainId);
+      if (!Number.isSafeInteger(chainId)) {
+        throw new Error(
+          `Chain ID ${domain.chainId} cannot be safely converted to a number for signing`,
+        );
+      }
+    }
+
     const messageHash = hashTypedDataMessage(
-      { ...domain, chainId: domain?.chainId === undefined ? undefined : Number(domain.chainId) },
+      { ...domain, chainId },
       types as unknown as Record<string, TypedDataField[]>,
       message,
     );
