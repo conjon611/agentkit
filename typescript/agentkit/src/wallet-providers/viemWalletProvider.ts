@@ -1,11 +1,10 @@
-// TODO: Improve type safety
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import {
   WalletClient as ViemWalletClient,
   createPublicClient,
   http,
   TransactionRequest,
+  TransactionReceipt,
+  TypedDataDefinition,
   PublicClient as ViemPublicClient,
   ReadContractParameters,
   ReadContractReturnType,
@@ -82,14 +81,13 @@ export class ViemWalletProvider extends EvmWalletProvider {
    * @param typedData - The typed data object to sign.
    * @returns The signed typed data object.
    */
-  async signTypedData(typedData: any): Promise<`0x${string}`> {
-    return this.#walletClient.signTypedData({
-      account: this.#walletClient.account!,
-      domain: typedData.domain!,
-      types: typedData.types!,
-      primaryType: typedData.primaryType!,
-      message: typedData.message!,
-    });
+  async signTypedData(typedData: TypedDataDefinition): Promise<`0x${string}`> {
+    const account = this.#walletClient.account;
+    if (!account) {
+      throw new Error("Account not found");
+    }
+
+    return this.#walletClient.signTypedData({ ...typedData, account });
   }
 
   /**
@@ -207,7 +205,7 @@ export class ViemWalletProvider extends EvmWalletProvider {
    * @param txHash - The hash of the transaction to wait for.
    * @returns The transaction receipt.
    */
-  async waitForTransactionReceipt(txHash: `0x${string}`): Promise<any> {
+  async waitForTransactionReceipt(txHash: `0x${string}`): Promise<TransactionReceipt> {
     return await this.#publicClient.waitForTransactionReceipt({ hash: txHash });
   }
 

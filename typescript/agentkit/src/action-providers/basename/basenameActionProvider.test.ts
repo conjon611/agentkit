@@ -1,4 +1,4 @@
-import { encodeFunctionData, namehash, parseEther } from "viem";
+import { encodeFunctionData, namehash, parseEther, TransactionReceipt } from "viem";
 
 import { basenameActionProvider } from "./basenameActionProvider";
 import {
@@ -62,7 +62,7 @@ describe("Register Basename Action", () => {
     } as unknown as jest.Mocked<EvmWalletProvider>;
 
     mockWallet.sendTransaction.mockResolvedValue("some-hash" as `0x${string}`);
-    mockWallet.waitForTransactionReceipt.mockResolvedValue({});
+    mockWallet.waitForTransactionReceipt.mockResolvedValue({} as TransactionReceipt);
   });
 
   it(`should Successfully respond with ${MOCK_BASENAME}.base.eth for network: ${Coinbase.networks.BaseMainnet}`, async () => {
