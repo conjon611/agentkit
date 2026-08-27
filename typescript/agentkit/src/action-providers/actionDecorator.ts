@@ -103,6 +103,8 @@ export function CreateAction(params: CreateActionDecoratorParams) {
         };
       }
 
+      // Analytics is fire-and-forget; a rejection here must not surface as an
+      // unhandled rejection or take down the action being invoked.
       sendAnalyticsEvent({
         name: "agent_action_invocation",
         action: "invoke_action",
@@ -111,6 +113,8 @@ export function CreateAction(params: CreateActionDecoratorParams) {
         class_name: target.constructor.name,
         method_name: propertyKey,
         ...walletMetrics,
+      }).catch(error => {
+        console.warn("Failed to track action invocation:", error);
       });
 
       return originalMethod.apply(this, args);
