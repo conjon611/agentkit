@@ -63,7 +63,7 @@ tests/action_providers/ssh/
 - `ssh_add_host_key`: Add a host key to the known hosts file
   - Useful for host verification
   - Supports various key types (ssh-rsa, ssh-ed25519, etc.)
-  - Configurable known_hosts file path
+  - known_hosts file path is configured on the provider, not per action
 
 ## Adding New Actions
 

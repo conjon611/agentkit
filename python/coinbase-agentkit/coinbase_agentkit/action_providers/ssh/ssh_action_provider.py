@@ -38,10 +38,22 @@ class SshActionProvider(ActionProvider):
     It supports managing multiple concurrent SSH connections.
     """
 
-    def __init__(self, max_connections: int = 10):
-        """Initialize the SshActionProvider."""
+    DEFAULT_KNOWN_HOSTS_FILE = "~/.ssh/known_hosts"
+
+    def __init__(self, max_connections: int = 10, known_hosts_file: str | None = None):
+        """Initialize the SshActionProvider.
+
+        Args:
+            max_connections: Maximum number of concurrent SSH connections.
+            known_hosts_file: Path to the known_hosts file that ssh_add_host_key
+                writes to. This is deployment configuration and is deliberately
+                not exposed as an action argument, so that a model cannot direct
+                writes at an arbitrary path.
+
+        """
         super().__init__("ssh", [])
         self.connection_pool = SSHConnectionPool(max_connections=max_connections)
+        self.known_hosts_file = known_hosts_file or self.DEFAULT_KNOWN_HOSTS_FILE
 
     @create_action(
         name="ssh_connect",
@@ -502,11 +514,8 @@ This tool adds an SSH host key to the local known_hosts file.
 Required inputs:
 - host: Hostname or IP of server. For non-standard ports, use "[hostname]:port".
   Example: "[example.com]:2222"
-- key: The SSH host key to add
+- key: The SSH host key to add, as base64
 - key_type: Type of SSH key (default: ssh-rsa, e.g., ssh-ed25519)
-
-Optional inputs:
-- known_hosts_file: Path to known_hosts file (default: ~/.ssh/known_hosts)
 
 Example successful response:
     Host key for 'example.com' successfully added to ~/.ssh/known_hosts
@@ -516,7 +525,7 @@ Example error response:
     Error: Unable to access known_hosts file
 
 Important notes:
-- This tool modifies the local known_hosts file
+- This tool modifies the local known_hosts file configured on the provider
 - Host keys are typically obtained from SSH connection errors
 - For non-standard ports, OpenSSH format [hostname]:port is required
 - Existing entries for the same host will be updated (not duplicated)
@@ -538,7 +547,7 @@ Important notes:
             host = validated_args.host
             key = validated_args.key
             key_type = validated_args.key_type
-            known_hosts_file = os.path.expanduser(validated_args.known_hosts_file)
+            known_hosts_file = os.path.expanduser(self.known_hosts_file)
 
             host_entry = host
             entry = f"{host_entry} {key_type} {key}\n"
@@ -595,14 +604,19 @@ Important notes:
 
 def ssh_action_provider(
     max_connections: int = 10,
+    known_hosts_file: str | None = None,
 ) -> SshActionProvider:
     """Create a new instance of the SshActionProvider.
 
     Args:
         max_connections: Maximum number of concurrent SSH connections (default: 10)
+        known_hosts_file: known_hosts file that ssh_add_host_key writes to
+            (default: ~/.ssh/known_hosts)
 
     Returns:
         An initialized SshActionProvider
 
     """
-    return SshActionProvider(max_connections=max_connections)
+    return SshActionProvider(
+        max_connections=max_connections, known_hosts_file=known_hosts_file
+    )
