@@ -48,7 +48,7 @@ jobs:
       - name: Install dependencies and build packages
         run: |
           cd typescript
-          npm install
+          npm ci
           npm run build
 
       - name: Find NPM packages
